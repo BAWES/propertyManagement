@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Jan 09, 2015 at 03:15 PM
+-- Generation Time: Jan 09, 2015 at 04:32 PM
 -- Server version: 5.6.22
 -- PHP Version: 5.5.14
 
@@ -74,6 +74,31 @@ CREATE TABLE IF NOT EXISTS `company` (
   `company_contact_name` varchar(128) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL DEFAULT '',
   `company_contact_phone` varchar(128) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL DEFAULT ''
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Company is the main part of the system, it can operate lands/agents/owners/tenants/etc.';
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `contract`
+--
+
+CREATE TABLE IF NOT EXISTS `contract` (
+  `contract_id` int(11) unsigned NOT NULL,
+  `unit_id` int(11) unsigned NOT NULL,
+  `contract_monthly_unit_price` decimal(11,0) NOT NULL,
+  `contract_start_date` date NOT NULL,
+  `contract_end_date` date DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Defines a contract between a unit and one or many tenants';
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `contract_tenant`
+--
+
+CREATE TABLE IF NOT EXISTS `contract_tenant` (
+  `contract_id` int(11) unsigned NOT NULL,
+  `tenant_id` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Defines one or more tenants that will be linked to a contract';
 
 -- --------------------------------------------------------
 
@@ -230,6 +255,40 @@ CREATE TABLE IF NOT EXISTS `property_type` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `tenant`
+--
+
+CREATE TABLE IF NOT EXISTS `tenant` (
+  `tenant_id` int(11) unsigned NOT NULL,
+  `company_id` int(11) unsigned NOT NULL,
+  `country_id` int(11) unsigned NOT NULL,
+  `tenant_first_name` varchar(128) NOT NULL DEFAULT '',
+  `tenant_second_name` varchar(128) DEFAULT '',
+  `tenant_third_name` varchar(128) DEFAULT '',
+  `tenant_fourth_name` varchar(128) DEFAULT '',
+  `tenant_last_name` varchar(128) NOT NULL DEFAULT '',
+  `tenant_work_address` text NOT NULL,
+  `tenant_phone1` varchar(128) NOT NULL DEFAULT '',
+  `tenant_phone2` varchar(128) NOT NULL DEFAULT '',
+  `tenant_marital_status` enum('single','married','divorced') DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Companies can keep track of all their tenants in this table';
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `tenant_identification`
+--
+
+CREATE TABLE IF NOT EXISTS `tenant_identification` (
+  `identify_id` int(11) unsigned NOT NULL,
+  `tenant_id` int(11) unsigned NOT NULL,
+  `identifytype_id` int(11) unsigned NOT NULL,
+  `identify_number` varchar(128) NOT NULL DEFAULT ''
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Every tenant can have multiple identifications (civil id etc.)';
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `unit`
 --
 
@@ -247,6 +306,19 @@ CREATE TABLE IF NOT EXISTS `unit` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `unit_question_response`
+--
+
+CREATE TABLE IF NOT EXISTS `unit_question_response` (
+  `response_id` int(11) unsigned NOT NULL,
+  `question_id` int(11) unsigned NOT NULL,
+  `unit_id` int(11) unsigned NOT NULL,
+  `response_text` text CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL COMMENT '(2) living rooms OR FALSE'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='This table stores all responses to questions defined for a unit';
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `unit_type`
 --
 
@@ -255,6 +327,19 @@ CREATE TABLE IF NOT EXISTS `unit_type` (
   `type_name_en` varchar(128) NOT NULL DEFAULT '' COMMENT 'eg: Apartment, Basement, Floor, Office',
   `type_name_ar` varchar(128) NOT NULL DEFAULT ''
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Shows available types of units.\nBased on the selected unit type, the user is required to answer additional questions about the unit';
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `unit_type_question`
+--
+
+CREATE TABLE IF NOT EXISTS `unit_type_question` (
+  `question_id` int(11) unsigned NOT NULL,
+  `unit_type_id` int(11) unsigned NOT NULL,
+  `question_text` text CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL COMMENT 'eg: Number of Living Rooms?',
+  `question_response_type` enum('number','true/false') CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL DEFAULT 'number'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Defines questions that must be answered for creation and update of unit types\nYou have two options which must be validated: True False questions and Number based';
 
 --
 -- Indexes for dumped tables
@@ -283,6 +368,18 @@ ALTER TABLE `city`
 --
 ALTER TABLE `company`
   ADD PRIMARY KEY (`company_id`);
+
+--
+-- Indexes for table `contract`
+--
+ALTER TABLE `contract`
+  ADD PRIMARY KEY (`contract_id`), ADD KEY `unit_id` (`unit_id`);
+
+--
+-- Indexes for table `contract_tenant`
+--
+ALTER TABLE `contract_tenant`
+  ADD PRIMARY KEY (`contract_id`,`tenant_id`);
 
 --
 -- Indexes for table `country`
@@ -345,16 +442,40 @@ ALTER TABLE `property_type`
   ADD PRIMARY KEY (`type_id`);
 
 --
+-- Indexes for table `tenant`
+--
+ALTER TABLE `tenant`
+  ADD PRIMARY KEY (`tenant_id`), ADD KEY `company_id` (`company_id`), ADD KEY `country_id` (`country_id`);
+
+--
+-- Indexes for table `tenant_identification`
+--
+ALTER TABLE `tenant_identification`
+  ADD PRIMARY KEY (`identify_id`), ADD KEY `tenant_id` (`tenant_id`), ADD KEY `identifytype_id` (`identifytype_id`);
+
+--
 -- Indexes for table `unit`
 --
 ALTER TABLE `unit`
   ADD PRIMARY KEY (`unit_id`), ADD KEY `property_id` (`property_id`), ADD KEY `unit_type_id` (`unit_type_id`);
 
 --
+-- Indexes for table `unit_question_response`
+--
+ALTER TABLE `unit_question_response`
+  ADD PRIMARY KEY (`response_id`), ADD KEY `question_id` (`question_id`), ADD KEY `unit_id` (`unit_id`);
+
+--
 -- Indexes for table `unit_type`
 --
 ALTER TABLE `unit_type`
   ADD PRIMARY KEY (`type_id`);
+
+--
+-- Indexes for table `unit_type_question`
+--
+ALTER TABLE `unit_type_question`
+  ADD PRIMARY KEY (`question_id`), ADD KEY `unit_type_id` (`unit_type_id`);
 
 --
 -- AUTO_INCREMENT for dumped tables
@@ -380,6 +501,16 @@ ALTER TABLE `city`
 --
 ALTER TABLE `company`
   MODIFY `company_id` int(10) unsigned NOT NULL AUTO_INCREMENT;
+--
+-- AUTO_INCREMENT for table `contract`
+--
+ALTER TABLE `contract`
+  MODIFY `contract_id` int(11) unsigned NOT NULL AUTO_INCREMENT;
+--
+-- AUTO_INCREMENT for table `contract_tenant`
+--
+ALTER TABLE `contract_tenant`
+  MODIFY `contract_id` int(11) unsigned NOT NULL AUTO_INCREMENT;
 --
 -- AUTO_INCREMENT for table `country`
 --
@@ -431,15 +562,35 @@ ALTER TABLE `property`
 ALTER TABLE `property_type`
   MODIFY `type_id` int(11) unsigned NOT NULL AUTO_INCREMENT;
 --
+-- AUTO_INCREMENT for table `tenant`
+--
+ALTER TABLE `tenant`
+  MODIFY `tenant_id` int(11) unsigned NOT NULL AUTO_INCREMENT;
+--
+-- AUTO_INCREMENT for table `tenant_identification`
+--
+ALTER TABLE `tenant_identification`
+  MODIFY `identify_id` int(11) unsigned NOT NULL AUTO_INCREMENT;
+--
 -- AUTO_INCREMENT for table `unit`
 --
 ALTER TABLE `unit`
   MODIFY `unit_id` int(11) unsigned NOT NULL AUTO_INCREMENT;
 --
+-- AUTO_INCREMENT for table `unit_question_response`
+--
+ALTER TABLE `unit_question_response`
+  MODIFY `response_id` int(11) unsigned NOT NULL AUTO_INCREMENT;
+--
 -- AUTO_INCREMENT for table `unit_type`
 --
 ALTER TABLE `unit_type`
   MODIFY `type_id` int(11) unsigned NOT NULL AUTO_INCREMENT;
+--
+-- AUTO_INCREMENT for table `unit_type_question`
+--
+ALTER TABLE `unit_type_question`
+  MODIFY `question_id` int(11) unsigned NOT NULL AUTO_INCREMENT;
 --
 -- Constraints for dumped tables
 --
@@ -455,6 +606,12 @@ ADD CONSTRAINT `agent_ibfk_1` FOREIGN KEY (`company_id`) REFERENCES `company` (`
 --
 ALTER TABLE `city`
 ADD CONSTRAINT `city_ibfk_1` FOREIGN KEY (`country_id`) REFERENCES `country` (`country_id`);
+
+--
+-- Constraints for table `contract`
+--
+ALTER TABLE `contract`
+ADD CONSTRAINT `contract_ibfk_1` FOREIGN KEY (`unit_id`) REFERENCES `unit` (`unit_id`);
 
 --
 -- Constraints for table `land`
@@ -493,11 +650,38 @@ ADD CONSTRAINT `property_ibfk_1` FOREIGN KEY (`property_type_id`) REFERENCES `pr
 ADD CONSTRAINT `property_ibfk_2` FOREIGN KEY (`land_id`) REFERENCES `land` (`land_id`);
 
 --
+-- Constraints for table `tenant`
+--
+ALTER TABLE `tenant`
+ADD CONSTRAINT `tenant_ibfk_1` FOREIGN KEY (`company_id`) REFERENCES `company` (`company_id`),
+ADD CONSTRAINT `tenant_ibfk_2` FOREIGN KEY (`country_id`) REFERENCES `country` (`country_id`);
+
+--
+-- Constraints for table `tenant_identification`
+--
+ALTER TABLE `tenant_identification`
+ADD CONSTRAINT `tenant_identification_ibfk_1` FOREIGN KEY (`tenant_id`) REFERENCES `tenant` (`tenant_id`),
+ADD CONSTRAINT `tenant_identification_ibfk_2` FOREIGN KEY (`identifytype_id`) REFERENCES `identification_type` (`identifytype_id`);
+
+--
 -- Constraints for table `unit`
 --
 ALTER TABLE `unit`
 ADD CONSTRAINT `unit_ibfk_1` FOREIGN KEY (`property_id`) REFERENCES `property` (`property_id`),
 ADD CONSTRAINT `unit_ibfk_2` FOREIGN KEY (`unit_type_id`) REFERENCES `unit_type` (`type_id`);
+
+--
+-- Constraints for table `unit_question_response`
+--
+ALTER TABLE `unit_question_response`
+ADD CONSTRAINT `unit_question_response_ibfk_1` FOREIGN KEY (`question_id`) REFERENCES `unit_type_question` (`question_id`),
+ADD CONSTRAINT `unit_question_response_ibfk_2` FOREIGN KEY (`unit_id`) REFERENCES `unit` (`unit_id`);
+
+--
+-- Constraints for table `unit_type_question`
+--
+ALTER TABLE `unit_type_question`
+ADD CONSTRAINT `unit_type_question_ibfk_1` FOREIGN KEY (`unit_type_id`) REFERENCES `unit_type` (`type_id`);
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
