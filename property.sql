@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Jan 10, 2015 at 04:04 PM
+-- Generation Time: Jan 10, 2015 at 04:13 PM
 -- Server version: 5.6.22
 -- PHP Version: 5.5.14
 
@@ -575,7 +575,7 @@ ALTER TABLE `unit_type_question`
 -- Indexes for table `vacancy`
 --
 ALTER TABLE `vacancy`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`), ADD KEY `unit_id` (`unit_id`);
 
 --
 -- AUTO_INCREMENT for dumped tables
@@ -834,6 +834,12 @@ ADD CONSTRAINT `unit_question_response_ibfk_2` FOREIGN KEY (`unit_id`) REFERENCE
 --
 ALTER TABLE `unit_type_question`
 ADD CONSTRAINT `unit_type_question_ibfk_1` FOREIGN KEY (`unit_type_id`) REFERENCES `unit_type` (`type_id`);
+
+--
+-- Constraints for table `vacancy`
+--
+ALTER TABLE `vacancy`
+ADD CONSTRAINT `vacancy_ibfk_1` FOREIGN KEY (`unit_id`) REFERENCES `unit` (`unit_id`);
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
