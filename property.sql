@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Jan 10, 2015 at 03:59 PM
+-- Generation Time: Jan 10, 2015 at 04:04 PM
 -- Server version: 5.6.22
 -- PHP Version: 5.5.14
 
@@ -97,7 +97,7 @@ CREATE TABLE IF NOT EXISTS `contract` (
 
 CREATE TABLE IF NOT EXISTS `contract_tenant` (
   `contract_id` int(11) unsigned NOT NULL,
-  `tenant_id` int(11) NOT NULL
+  `tenant_id` int(11) unsigned NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Defines one or more tenants that will be linked to a contract';
 
 -- --------------------------------------------------------
@@ -449,7 +449,7 @@ ALTER TABLE `contract`
 -- Indexes for table `contract_tenant`
 --
 ALTER TABLE `contract_tenant`
-  ADD PRIMARY KEY (`contract_id`,`tenant_id`);
+  ADD PRIMARY KEY (`contract_id`,`tenant_id`), ADD KEY `tenant_id` (`tenant_id`);
 
 --
 -- Indexes for table `country`
@@ -737,6 +737,13 @@ ADD CONSTRAINT `city_ibfk_1` FOREIGN KEY (`country_id`) REFERENCES `country` (`c
 --
 ALTER TABLE `contract`
 ADD CONSTRAINT `contract_ibfk_1` FOREIGN KEY (`unit_id`) REFERENCES `unit` (`unit_id`);
+
+--
+-- Constraints for table `contract_tenant`
+--
+ALTER TABLE `contract_tenant`
+ADD CONSTRAINT `contract_tenant_ibfk_1` FOREIGN KEY (`contract_id`) REFERENCES `contract` (`contract_id`),
+ADD CONSTRAINT `contract_tenant_ibfk_2` FOREIGN KEY (`tenant_id`) REFERENCES `tenant` (`tenant_id`);
 
 --
 -- Constraints for table `expense`
