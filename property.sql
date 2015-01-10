@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Jan 09, 2015 at 04:32 PM
+-- Generation Time: Jan 10, 2015 at 03:59 PM
 -- Server version: 5.6.22
 -- PHP Version: 5.5.14
 
@@ -111,6 +111,35 @@ CREATE TABLE IF NOT EXISTS `country` (
   `country_name_en` varchar(128) NOT NULL DEFAULT '',
   `country_name_ar` varchar(128) NOT NULL DEFAULT ''
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='List of countries accepted by the system, defined by admin';
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `expense`
+--
+
+CREATE TABLE IF NOT EXISTS `expense` (
+  `expense_id` int(11) unsigned NOT NULL,
+  `expense_type_id` int(11) unsigned NOT NULL,
+  `property_id` int(11) unsigned NOT NULL,
+  `unit_id` int(11) unsigned DEFAULT NULL,
+  `expense_amount` decimal(11,0) NOT NULL,
+  `expense_reference` varchar(128) NOT NULL DEFAULT '',
+  `expense_description` text NOT NULL,
+  `expense_date` date NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Keep track of expenses linked with properties and their units';
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `expense_type`
+--
+
+CREATE TABLE IF NOT EXISTS `expense_type` (
+  `type_id` int(11) unsigned NOT NULL,
+  `type_name_en` varchar(128) NOT NULL DEFAULT '' COMMENT '“caretaker, electricity, air conditioning, paint, plumbing”',
+  `type_name_ar` varchar(128) NOT NULL DEFAULT ''
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Possible types of expenses that may be associated to properties';
 
 -- --------------------------------------------------------
 
@@ -255,6 +284,34 @@ CREATE TABLE IF NOT EXISTS `property_type` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `receipt`
+--
+
+CREATE TABLE IF NOT EXISTS `receipt` (
+  `receipt_id` int(11) unsigned NOT NULL,
+  `contract_id` int(11) unsigned NOT NULL,
+  `receipt_amount_due` decimal(11,0) NOT NULL,
+  `receipt_monthyear` date NOT NULL COMMENT 'month and year this contract belongs to',
+  `receipt_datetime_created` datetime NOT NULL,
+  `receipt_payment_status` enum('paid','unpaid') NOT NULL DEFAULT 'unpaid'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='You can only have one receipt for a given month for any contract\nAgent must first select the month/year and the property, and based the current active contracts on that property you will view all receipts that must be generated and ones that have been generated.\nAgent can then select which receipts he wishes to generate, status of them by default is unpaid\nFor receipt of the first month, will need to divide the number of days they rented by 30 to get the percentage of payment they need to pay';
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `receipt_payment`
+--
+
+CREATE TABLE IF NOT EXISTS `receipt_payment` (
+  `payment_id` int(11) unsigned NOT NULL,
+  `receipt_id` int(11) unsigned NOT NULL,
+  `payment_amount` decimal(11,0) NOT NULL,
+  `payment_datetime` datetime NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `tenant`
 --
 
@@ -341,6 +398,19 @@ CREATE TABLE IF NOT EXISTS `unit_type_question` (
   `question_response_type` enum('number','true/false') CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL DEFAULT 'number'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Defines questions that must be answered for creation and update of unit types\nYou have two options which must be validated: True False questions and Number based';
 
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `vacancy`
+--
+
+CREATE TABLE IF NOT EXISTS `vacancy` (
+  `id` int(11) unsigned NOT NULL,
+  `unit_id` int(11) unsigned NOT NULL,
+  `vacancy_unit_price` decimal(11,0) NOT NULL COMMENT '300 KD monthly rent',
+  `vacancy_monthyear` date NOT NULL COMMENT '12-2014'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Every end of month, a cron job will run and populate this table.\nScript will loop through all properties and look for units that don’t have contracts and store amount for each unit';
+
 --
 -- Indexes for dumped tables
 --
@@ -386,6 +456,18 @@ ALTER TABLE `contract_tenant`
 --
 ALTER TABLE `country`
   ADD PRIMARY KEY (`country_id`);
+
+--
+-- Indexes for table `expense`
+--
+ALTER TABLE `expense`
+  ADD PRIMARY KEY (`expense_id`), ADD KEY `expense_type_id` (`expense_type_id`), ADD KEY `property_id` (`property_id`), ADD KEY `unit_id` (`unit_id`);
+
+--
+-- Indexes for table `expense_type`
+--
+ALTER TABLE `expense_type`
+  ADD PRIMARY KEY (`type_id`);
 
 --
 -- Indexes for table `identification_type`
@@ -442,6 +524,18 @@ ALTER TABLE `property_type`
   ADD PRIMARY KEY (`type_id`);
 
 --
+-- Indexes for table `receipt`
+--
+ALTER TABLE `receipt`
+  ADD PRIMARY KEY (`receipt_id`), ADD KEY `contract_id` (`contract_id`);
+
+--
+-- Indexes for table `receipt_payment`
+--
+ALTER TABLE `receipt_payment`
+  ADD PRIMARY KEY (`payment_id`), ADD KEY `receipt_id` (`receipt_id`);
+
+--
 -- Indexes for table `tenant`
 --
 ALTER TABLE `tenant`
@@ -476,6 +570,12 @@ ALTER TABLE `unit_type`
 --
 ALTER TABLE `unit_type_question`
   ADD PRIMARY KEY (`question_id`), ADD KEY `unit_type_id` (`unit_type_id`);
+
+--
+-- Indexes for table `vacancy`
+--
+ALTER TABLE `vacancy`
+  ADD PRIMARY KEY (`id`);
 
 --
 -- AUTO_INCREMENT for dumped tables
@@ -516,6 +616,16 @@ ALTER TABLE `contract_tenant`
 --
 ALTER TABLE `country`
   MODIFY `country_id` int(11) unsigned NOT NULL AUTO_INCREMENT;
+--
+-- AUTO_INCREMENT for table `expense`
+--
+ALTER TABLE `expense`
+  MODIFY `expense_id` int(11) unsigned NOT NULL AUTO_INCREMENT;
+--
+-- AUTO_INCREMENT for table `expense_type`
+--
+ALTER TABLE `expense_type`
+  MODIFY `type_id` int(11) unsigned NOT NULL AUTO_INCREMENT;
 --
 -- AUTO_INCREMENT for table `identification_type`
 --
@@ -562,6 +672,16 @@ ALTER TABLE `property`
 ALTER TABLE `property_type`
   MODIFY `type_id` int(11) unsigned NOT NULL AUTO_INCREMENT;
 --
+-- AUTO_INCREMENT for table `receipt`
+--
+ALTER TABLE `receipt`
+  MODIFY `receipt_id` int(11) unsigned NOT NULL AUTO_INCREMENT;
+--
+-- AUTO_INCREMENT for table `receipt_payment`
+--
+ALTER TABLE `receipt_payment`
+  MODIFY `payment_id` int(11) unsigned NOT NULL AUTO_INCREMENT;
+--
 -- AUTO_INCREMENT for table `tenant`
 --
 ALTER TABLE `tenant`
@@ -592,6 +712,11 @@ ALTER TABLE `unit_type`
 ALTER TABLE `unit_type_question`
   MODIFY `question_id` int(11) unsigned NOT NULL AUTO_INCREMENT;
 --
+-- AUTO_INCREMENT for table `vacancy`
+--
+ALTER TABLE `vacancy`
+  MODIFY `id` int(11) unsigned NOT NULL AUTO_INCREMENT;
+--
 -- Constraints for dumped tables
 --
 
@@ -612,6 +737,14 @@ ADD CONSTRAINT `city_ibfk_1` FOREIGN KEY (`country_id`) REFERENCES `country` (`c
 --
 ALTER TABLE `contract`
 ADD CONSTRAINT `contract_ibfk_1` FOREIGN KEY (`unit_id`) REFERENCES `unit` (`unit_id`);
+
+--
+-- Constraints for table `expense`
+--
+ALTER TABLE `expense`
+ADD CONSTRAINT `expense_ibfk_1` FOREIGN KEY (`expense_type_id`) REFERENCES `expense_type` (`type_id`),
+ADD CONSTRAINT `expense_ibfk_2` FOREIGN KEY (`property_id`) REFERENCES `property` (`property_id`),
+ADD CONSTRAINT `expense_ibfk_3` FOREIGN KEY (`unit_id`) REFERENCES `unit` (`unit_id`);
 
 --
 -- Constraints for table `land`
@@ -648,6 +781,18 @@ ADD CONSTRAINT `owner_identification_ibfk_2` FOREIGN KEY (`identifytype_id`) REF
 ALTER TABLE `property`
 ADD CONSTRAINT `property_ibfk_1` FOREIGN KEY (`property_type_id`) REFERENCES `property_type` (`type_id`),
 ADD CONSTRAINT `property_ibfk_2` FOREIGN KEY (`land_id`) REFERENCES `land` (`land_id`);
+
+--
+-- Constraints for table `receipt`
+--
+ALTER TABLE `receipt`
+ADD CONSTRAINT `receipt_ibfk_1` FOREIGN KEY (`contract_id`) REFERENCES `contract` (`contract_id`);
+
+--
+-- Constraints for table `receipt_payment`
+--
+ALTER TABLE `receipt_payment`
+ADD CONSTRAINT `receipt_payment_ibfk_1` FOREIGN KEY (`receipt_id`) REFERENCES `receipt` (`receipt_id`);
 
 --
 -- Constraints for table `tenant`
