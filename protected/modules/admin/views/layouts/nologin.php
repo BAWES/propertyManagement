@@ -46,9 +46,8 @@
 	<div class="clear"></div>
 
 	<div id="footer">
-		Copyright &copy; <?php echo date('Y'); ?> FullyBooked.<br/>
+		Copyright &copy; <?php echo date('Y'); ?> BAWES.<br/>
 		All Rights Reserved.<br/>
-		Powered by Ghaliah Technology
 	</div><!-- footer -->
 
 </div><!-- page -->

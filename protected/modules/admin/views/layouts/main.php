@@ -54,9 +54,8 @@
 	<div class="clear"></div>
 
 	<div id="footer">
-		Copyright &copy; <?php echo date('Y'); ?> Khalid Al-Mutawa.<br/>
+		Copyright &copy; <?php echo date('Y'); ?> BAWES.<br/>
 		All Rights Reserved.<br/>
-		Powered by Khalidm.net
 	</div><!-- footer -->
 
 </div><!-- page -->
