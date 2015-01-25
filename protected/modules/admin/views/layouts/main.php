@@ -31,7 +31,11 @@
                     'lastItemCssClass'=>'floatRight',
 			'items'=>array(
 				array('label'=>'Dashboard', 'url'=>array('/admin/default/index')),
+				array('label'=>'Companies', 'url'=>array('/admin/company/index')),
 				array('label'=>'Admins', 'url'=>array('/admin/admin/index')),
+				array('label'=>'Log', 'url'=>array('/admin/log/index')),
+				array('label'=>'Country', 'url'=>array('/admin/country/index')),
+				array('label'=>'City', 'url'=>array('/admin/city/index')),
 				array('label'=>'Login', 'url'=>array('/admin/default/login'), 'visible'=>Yii::app()->user->isGuest),
 				array('label'=>'Logout ('.Yii::app()->user->name.')', 'url'=>array('/admin/default/logout'), 'visible'=>!Yii::app()->user->isGuest)
 			),
