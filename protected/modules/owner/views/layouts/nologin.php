@@ -23,17 +23,14 @@
 <div class="container" id="page">
 
 	<div id="header">
-		<div id="logo">Administrator</div>
+		<div id="logo">Owner</div>
 	</div><!-- header -->
 
 	<div id="mainmenu">
 		<?php $this->widget('zii.widgets.CMenu',array(
-                    'lastItemCssClass'=>'floatRight',
 			'items'=>array(
-				array('label'=>'Dashboard', 'url'=>array('/admin/default/index')),
-				array('label'=>'Admins', 'url'=>array('/admin/admin/index')),
-				array('label'=>'Login', 'url'=>array('/admin/default/login'), 'visible'=>Yii::app()->user->isGuest),
-				array('label'=>'Logout ('.Yii::app()->user->name.')', 'url'=>array('/admin/default/logout'), 'visible'=>!Yii::app()->user->isGuest)
+				array('label'=>'Login', 'url'=>array('/owner/default/login'), 'visible'=>Yii::app()->user->isGuest),
+				array('label'=>'Logout ('.Yii::app()->user->name.')', 'url'=>array('/owner/default/logout'), 'visible'=>!Yii::app()->user->isGuest)
 			),
 		)); ?>
 	</div><!-- mainmenu -->

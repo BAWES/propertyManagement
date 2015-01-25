@@ -20,6 +20,8 @@ return array(
 
 	'modules'=>array(
 		'admin',
+                'company',
+                'owner',
 		// uncomment the following to enable the Gii tool
 		
 		'gii'=>array(
